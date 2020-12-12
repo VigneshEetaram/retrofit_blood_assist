@@ -27,8 +27,47 @@ public class MainActivity extends AppCompatActivity {
 
         textViewResults = findViewById(R.id.text_view_result);
 
-        getPosts();
+        //getPosts();
+        createPost();
 
+    }
+
+    void createPost(){
+        Post post=new Post(89,"MockTitle","Mock Body Data");
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://jsonplaceholder.typicode.com/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        JsonPlaceHolderApi jsonPlaceHolderApi = retrofit.create(JsonPlaceHolderApi.class);
+
+        Call<Post> call = jsonPlaceHolderApi.createPost(post);
+
+        call.enqueue(new Callback<Post>() {
+            @Override
+            public void onResponse(Call<Post> call, Response<Post> response) {
+                if (!response.isSuccessful()) {
+                    textViewResults.setText("Code: " + response.code());
+                    return;
+                }
+                Post postResponse = response.body();
+
+                String content = "";
+                content += "Code: " + response.code()+"\n";
+                content += "ID: " + postResponse.getId()+"\n";
+                content += "User ID: " + postResponse.getUserId()+"\n";
+                content += "Title: " + postResponse.getTitle()+"\n";
+                content += "Text: " + postResponse.getText()+"\n\n";
+
+                textViewResults.setText(content);
+
+
+            }
+
+            @Override
+            public void onFailure(Call<Post> call, Throwable t) {
+                    textViewResults.setText(t.getMessage());
+            }
+        });
     }
 
     public void getPosts(){
